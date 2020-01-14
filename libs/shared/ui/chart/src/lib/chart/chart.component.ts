@@ -6,6 +6,7 @@ import {
   OnInit
 } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Chart } from '../interfaces/chart.interface';
 
 @Component({
   selector: 'coding-challenge-chart',
@@ -14,26 +15,22 @@ import { Observable } from 'rxjs';
 })
 export class ChartComponent implements OnInit {
   @Input() data$: Observable<any>;
-  chartData: any;
+  chart: Chart;
 
-  chart: {
-    title: string;
-    type: string;
-    data: any;
-    columnNames: string[];
-    options: any;
-  };
+  get shouldDisplayChart(): boolean {
+    return this.chart && !!this.chart.data;
+  }
   constructor(private cd: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.chart = {
       title: '',
       type: 'LineChart',
-      data: [],
+      data: null,
       columnNames: ['period', 'close'],
       options: { title: `Stock price`, width: '600', height: '400' }
     };
 
-    this.data$.subscribe(newData => (this.chartData = newData));
+    this.data$.subscribe(newData => (this.chart.data = newData));
   }
 }
