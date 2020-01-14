@@ -6,6 +6,8 @@ import {
   OnInit
 } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Chart } from '../interfaces/chart.interface';
+import { ChartDataPoint } from '../interfaces/chart-data-point.interface';
 
 @Component({
   selector: 'coding-challenge-chart',
@@ -14,15 +16,9 @@ import { Observable } from 'rxjs';
 })
 export class ChartComponent implements OnInit {
   @Input() data$: Observable<any>;
-  chartData: any;
+  chartData: ChartDataPoint[];
+  chart: Chart;
 
-  chart: {
-    title: string;
-    type: string;
-    data: any;
-    columnNames: string[];
-    options: any;
-  };
   constructor(private cd: ChangeDetectorRef) {}
 
   ngOnInit() {
