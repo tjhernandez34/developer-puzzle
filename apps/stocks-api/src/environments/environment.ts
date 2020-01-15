@@ -5,5 +5,6 @@
 export const environment = {
   production: false,
   apiKey: '',
-  apiURL: 'https://sandbox.iexapis.com'
+  apiURL: 'https://sandbox.iexapis.com',
+  redisExpirationTime: 3600
 };
