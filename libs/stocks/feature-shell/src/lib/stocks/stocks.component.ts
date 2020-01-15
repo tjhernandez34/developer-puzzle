@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PriceQueryFacade } from '@coding-challenge/stocks/data-access-price-query';
+import { DateRangeValidator } from './validators/date-range.validator';
+import { filter, map, debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'coding-challenge-stocks',
@@ -11,6 +13,8 @@ export class StocksComponent implements OnInit {
   stockPickerForm: FormGroup;
   symbol: string;
   period: string;
+  minDate: Date;
+  maxDate: Date;
 
   quotes$ = this.priceQuery.priceQueries$;
 
@@ -25,19 +29,99 @@ export class StocksComponent implements OnInit {
     { viewValue: 'One month', value: '1m' }
   ];
 
+  get shouldDisplayDateError(): boolean {
+    return (
+      this.stockPickerForm.errors && this.stockPickerForm.errors.fromAfterTo
+    );
+  }
+
   constructor(private fb: FormBuilder, private priceQuery: PriceQueryFacade) {
-    this.stockPickerForm = fb.group({
-      symbol: [null, Validators.required],
-      period: [null, Validators.required]
-    });
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const date = today.getDate();
+    // according to API documentation the oldest records will be 15 years old
+    // https://iexcloud.io/docs/api/#charts
+    const maxAgeOfAPIData = 15;
+
+    this.maxDate = new Date(year, month, date);
+    this.minDate = new Date(year - maxAgeOfAPIData, month, date);
+
+    this.stockPickerForm = fb.group(
+      {
+        symbol: [null, Validators.required],
+        to: [today, [Validators.required]],
+        from: [today, [Validators.required]]
+      },
+      { validators: DateRangeValidator }
+    );
+
+    this.stockPickerForm.valueChanges
+      .pipe(
+        debounceTime(500),
+        filter(() => this.stockPickerForm.invalid),
+        map(() => {
+          if (this.shouldDisplayDateError) {
+            this.stockPickerForm.get('from').patchValue(today);
+            this.stockPickerForm.get('to').patchValue(today);
+            this.stockPickerForm.updateValueAndValidity();
+          }
+        })
+      )
+      .subscribe();
   }
 
   ngOnInit() {}
 
   fetchQuote() {
     if (this.stockPickerForm.valid) {
-      const { symbol, period } = this.stockPickerForm.value;
-      this.priceQuery.fetchQuote(symbol, period);
+      const { symbol, to, from } = this.stockPickerForm.value;
+      const necessaryPeriod = this.setPeriod(from);
+
+      this.priceQuery.fetchQuote(symbol, necessaryPeriod, from, to);
     }
+  }
+
+  private setPeriod(from: Date): string {
+    let desiredSearchPeriod = 'max';
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const date = today.getDate();
+    const fiveYearsAgo = new Date(year - 5, month, date);
+    const twoYearsAgo = new Date(year - 2, month, date);
+    const oneYearAgo = new Date(year - 1, month, date);
+    const sixMonthsAgo = new Date(year, month, date);
+    sixMonthsAgo.setMonth(today.getMonth() - 6);
+    const threeMonthsAgo = new Date(year, month, date);
+    threeMonthsAgo.setMonth(today.getMonth() - 3);
+    const oneMonthAgo = new Date(year, month, date);
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+
+    if (fiveYearsAgo <= from) {
+      desiredSearchPeriod = '5y';
+    }
+
+    if (twoYearsAgo <= from) {
+      desiredSearchPeriod = '2y';
+    }
+
+    if (oneYearAgo <= from) {
+      desiredSearchPeriod = '1y';
+    }
+
+    if (sixMonthsAgo <= from) {
+      desiredSearchPeriod = '6m';
+    }
+
+    if (threeMonthsAgo <= from) {
+      desiredSearchPeriod = '3m';
+    }
+
+    if (oneMonthAgo <= from) {
+      desiredSearchPeriod = '1m';
+    }
+
+    return desiredSearchPeriod;
   }
 }

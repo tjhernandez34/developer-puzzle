@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import {
+  MatDatepickerModule,
   MatFormFieldModule,
   MatInputModule,
+  MatNativeDateModule,
   MatSelectModule,
   MatButtonModule
 } from '@angular/material';
@@ -18,12 +20,15 @@ import { ReactiveFormsModule } from '@angular/forms';
       { path: '', pathMatch: 'full', component: StocksComponent }
     ]),
     ReactiveFormsModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatNativeDateModule,
     MatSelectModule,
     MatButtonModule,
     SharedUiChartModule
   ],
+  providers: [MatDatepickerModule],
   declarations: [StocksComponent]
 })
 export class StocksFeatureShellModule {}
