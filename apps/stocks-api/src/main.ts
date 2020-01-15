@@ -5,6 +5,7 @@
 import { Server } from 'hapi';
 import { StockPriceService } from './app/services/stock-price.service';
 import * as Redis from 'redis';
+import { StockAPIContstants } from './stocks-api.constants';
 
 const init = async () => {
   const redisClient = Redis.createClient(6379);
@@ -26,11 +27,16 @@ const init = async () => {
       const params = request.query;
       const symbol = params.symbol as string;
       const period = params.period as string;
-      return StockPriceService.getPriceHistory(
-        redisClient,
-        symbol,
-        period
-      ).then(results => h.response(results));
+
+      return StockPriceService.getPriceHistory(redisClient, symbol, period)
+        .then((results: object[]) => h.response(results))
+        .catch(err => {
+          if (err.message === StockAPIContstants.unknownSymbolMessage) {
+            return h.response([]);
+          }
+
+          throw new Error(err.message);
+        });
     }
   });
 
@@ -39,7 +45,8 @@ const init = async () => {
 };
 
 process.on('unhandledRejection', err => {
-  console.log(err);
+  // todo add error handling for missing param values
+  console.error(err);
   process.exit(1);
 });
 
