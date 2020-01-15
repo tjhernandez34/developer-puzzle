@@ -29,7 +29,17 @@ export class PriceQueryEffects {
             }?token=${this.env.apiKey}`
           )
           .pipe(
-            map(resp => new PriceQueryFetched(resp as PriceQueryResponse[]))
+            map((resp: object[]) => {
+              const filteredResp = this.filterForRange(
+                resp,
+                action.from,
+                action.to
+              );
+
+              return new PriceQueryFetched(
+                filteredResp as PriceQueryResponse[]
+              );
+            })
           );
       },
 
@@ -44,4 +54,17 @@ export class PriceQueryEffects {
     private httpClient: HttpClient,
     private dataPersistence: DataPersistence<PriceQueryPartialState>
   ) {}
+
+  private filterForRange(data: object[], from: Date, to: Date): object[] {
+    return data.filter(dataPoint => {
+      const dateParts = dataPoint['date'].split('-');
+      const dataDate = new Date(
+        parseInt(dateParts[0], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[2], 10)
+      );
+
+      return from <= dataDate && dataDate <= to;
+    });
+  }
 }
