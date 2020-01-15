@@ -1,5 +1,5 @@
 <google-chart
-  *ngIf="chartData"
+  *ngIf="chartData && 0 < chartData.length"
   [title]="chart.title"
   [type]="chart.type"
   [data]="chartData"
@@ -7,3 +7,4 @@
   [options]="chart.options"
 >
 </google-chart>
+<p *ngIf="chartData && 0 === chartData.length">No Results Found</p>
