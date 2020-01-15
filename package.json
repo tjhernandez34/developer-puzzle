@@ -7,6 +7,7 @@
     "start": "ng serve",
     "serve:stocks": "ng serve stocks",
     "serve:stocks-api": "ng run stocks-api:serve",
+    "start:redis": "redis-server",
     "build": "ng build",
     "test": "ng test",
     "lint": "./node_modules/.bin/nx lint && ng lint",
@@ -57,6 +58,7 @@
     "hapi": "^18.1.0",
     "lodash": "^4.17.11",
     "lodash-es": "^4.17.11",
+    "redis": "^2.8.0",
     "rxjs": "6.3.3",
     "zone.js": "^0.8.26"
   },
