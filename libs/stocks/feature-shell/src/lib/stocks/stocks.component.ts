@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { PriceQueryFacade } from '@coding-challenge/stocks/data-access-price-query';
 import { DateRangeValidator } from './validators/date-range.validator';
+import { filter, map, debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'coding-challenge-stocks',
@@ -54,6 +55,20 @@ export class StocksComponent implements OnInit {
       },
       { validators: DateRangeValidator }
     );
+
+    this.stockPickerForm.valueChanges
+      .pipe(
+        debounceTime(500),
+        filter(() => this.stockPickerForm.invalid),
+        map(() => {
+          if (this.shouldDisplayDateError) {
+            this.stockPickerForm.get('from').patchValue(today);
+            this.stockPickerForm.get('to').patchValue(today);
+            this.stockPickerForm.updateValueAndValidity();
+          }
+        })
+      )
+      .subscribe();
   }
 
   ngOnInit() {}
