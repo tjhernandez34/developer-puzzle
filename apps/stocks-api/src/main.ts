@@ -9,7 +9,12 @@ import { environment } from './environments/environment';
 const init = async () => {
   const server = new Server({
     port: 3333,
-    host: 'localhost'
+    host: 'localhost',
+    routes: {
+      cors: {
+        origin: ['http://localhost:4200']
+      }
+    }
   });
 
   server.route({
