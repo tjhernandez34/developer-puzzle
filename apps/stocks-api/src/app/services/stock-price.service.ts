@@ -1,15 +1,21 @@
-import * as Redis from 'redis';
 import * as Wreck from '@hapi/wreck';
 import { environment } from '../../environments/environment';
-import { promisify, format } from 'util';
+import { promisify } from 'util';
 import { StockAPIContstants } from '../../stocks-api.constants';
+import { RedisClient } from 'redis';
+import { IncomingMessage } from 'http';
 
 class StockPriceService {
-  static getPriceHistory(redisClient: any, symbol: string, period: string) {
+  static getPriceHistory(
+    redisClient: RedisClient,
+    symbol: string,
+    period: string
+  ): Promise<object[]> {
     const redisSearchKey = `${symbol}:${period}`;
-    const getAsync = promisify(redisClient.get).bind(redisClient);
 
-    return getAsync(redisSearchKey).then(results => {
+    const getAsync: Function = promisify(redisClient.get).bind(redisClient);
+
+    return getAsync(redisSearchKey).then((results: string) => {
       if (results) {
         console.log('results');
         return JSON.parse(results);
@@ -22,7 +28,7 @@ class StockPriceService {
           environment.apiKey
         }`
       )
-        .then(async resp => {
+        .then(async (resp: IncomingMessage) => {
           const data = await Wreck.read(resp);
           const isUnknownSymbol =
             data.toString() === StockAPIContstants.unknownSymbolMessage;
@@ -38,7 +44,7 @@ class StockPriceService {
           );
           return JSON.parse(data.toString());
         })
-        .catch(err => {
+        .catch((err: Error) => {
           throw new Error(err.message);
         });
     });

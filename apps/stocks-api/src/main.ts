@@ -6,9 +6,10 @@ import { Server } from 'hapi';
 import { StockPriceService } from './app/services/stock-price.service';
 import * as Redis from 'redis';
 import { StockAPIContstants } from './stocks-api.constants';
+import { RedisClient } from 'redis';
 
 const init = async () => {
-  const redisClient = Redis.createClient(6379);
+  const redisClient: RedisClient = Redis.createClient(6379);
 
   const server = new Server({
     port: 3333,
@@ -30,7 +31,7 @@ const init = async () => {
 
       return StockPriceService.getPriceHistory(redisClient, symbol, period)
         .then((results: object[]) => h.response(results))
-        .catch(err => {
+        .catch((err: Error) => {
           if (err.message === StockAPIContstants.unknownSymbolMessage) {
             return h.response([]);
           }
