@@ -3,6 +3,8 @@
  * This is only a minimal backend to get started.
  **/
 import { Server } from 'hapi';
+import * as Wreck from '@hapi/wreck';
+import { environment } from './environments/environment';
 
 const init = async () => {
   const server = new Server({
@@ -12,11 +14,15 @@ const init = async () => {
 
   server.route({
     method: 'GET',
-    path: '/',
+    path: '/api/stock-price',
     handler: (request, h) => {
-      return {
-        hello: 'world'
-      };
+      const params = request.query;
+      return Wreck.request(
+        'get',
+        `${environment.apiURL}/beta/stock/${params.symbol}/chart/${
+          params.period
+        }?token=${environment.apiKey}`
+      );
     }
   });
 
