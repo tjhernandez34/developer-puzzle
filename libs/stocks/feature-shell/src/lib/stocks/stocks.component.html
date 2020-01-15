@@ -16,18 +16,72 @@
       >
     </mat-error>
   </mat-form-field>
+  <mat-form-field>
+    <mat-label>From date:</mat-label>
+    <input
+      [class.error-field]="shouldDisplayDateError"
+      matInput
+      formControlName="from"
+      [min]="minDate"
+      [max]="maxDate"
+      [matDatepicker]="from"
+      placeholder="Choose a date"
+    />
+    <mat-error>
+      <span
+        *ngIf="
+          !stockPickerForm.get('from').valid &&
+          stockPickerForm.get('from').touched &&
+          !stockPickerForm.get('from').value
+        "
+        >From date is required</span
+      >
+      <mat-error
+        *ngIf="stockPickerForm.get('from').hasError('matDatepickerMin')"
+        >Date cannot be more than 15 years ago</mat-error
+      >
+      <mat-error
+        *ngIf="stockPickerForm.get('from').hasError('matDatepickerMax')"
+        >Date cannot be in future</mat-error
+      >
+    </mat-error>
+    <mat-datepicker-toggle matSuffix [for]="from"></mat-datepicker-toggle>
+    <mat-datepicker #from></mat-datepicker>
+  </mat-form-field>
 
   <mat-form-field>
-    <mat-label>Favorite time period</mat-label>
-    <mat-select formControlName="period">
-      <mat-option
-        *ngFor="let timePeriod of timePeriods"
-        [value]="timePeriod.value"
+    <mat-label>To date:</mat-label>
+    <input
+      [class.error-field]="shouldDisplayDateError"
+      matInput
+      formControlName="to"
+      [min]="minDate"
+      [max]="maxDate"
+      [matDatepicker]="to"
+      placeholder="Choose a date"
+    />
+    <mat-error>
+      <span
+        *ngIf="
+          !stockPickerForm.get('to').valid &&
+          stockPickerForm.get('to').touched &&
+          !stockPickerForm.get('to').value
+        "
+        >To date is required</span
       >
-        {{ timePeriod.viewValue }}
-      </mat-option>
-    </mat-select>
+      <mat-error *ngIf="stockPickerForm.get('to').hasError('matDatepickerMin')"
+        >Date cannot be more than 15 years ago
+      </mat-error>
+      <mat-error *ngIf="stockPickerForm.get('to').hasError('matDatepickerMax')"
+        >Date cannot be in future</mat-error
+      >
+    </mat-error>
+    <mat-datepicker-toggle matSuffix [for]="to"></mat-datepicker-toggle>
+    <mat-datepicker #to></mat-datepicker>
   </mat-form-field>
+  <mat-error>
+    <span *ngIf="shouldDisplayDateError">From date is after to date</span>
+  </mat-error>
 
   <button (click)="fetchQuote()" mat-raised-button>Go</button>
 </form>
