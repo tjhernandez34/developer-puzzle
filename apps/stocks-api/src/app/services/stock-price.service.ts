@@ -28,8 +28,10 @@ class StockPriceService {
           environment.apiKey
         }`
       )
-        .then(async (resp: IncomingMessage) => {
-          const data = await Wreck.read(resp);
+        .then((resp: IncomingMessage) => {
+          return Wreck.read(resp);
+        })
+        .then(data => {
           const isUnknownSymbol =
             data.toString() === StockAPIContstants.unknownSymbolMessage;
 
